@@ -521,16 +521,23 @@ else
 fi
 
 
+: ${R_HOME=`R RHOME`}
+if test -z "${R_HOME}"; then
+  echo "could not determine R_HOME"
+  exit 1
+fi
+CC=`grep "^CC" ${R_HOME}/etc/Makeconf | sed "s/^CC *= *//"`
+CFLAGS=`grep "^CFLAGS" ${R_HOME}/etc/Makeconf | sed "s/^CFLAGS *= *//"`
 
 for ac_func in ftruncate
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:529: checking for $ac_func" >&5
+echo "configure:536: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 534 "configure"
+#line 541 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -553,7 +560,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:557: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:564: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -578,7 +585,7 @@ fi
 done
 
 echo $ac_n "checking size of long double""... $ac_c" 1>&6
-echo "configure:582: checking size of long double" >&5
+echo "configure:589: checking size of long double" >&5
 if eval "test \"`echo '$''{'ac_cv_sizeof_long_double'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -586,7 +593,7 @@ else
   ac_cv_sizeof_long_double=0
 else
   cat > conftest.$ac_ext <<EOF
-#line 590 "configure"
+#line 597 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 main()
@@ -597,7 +604,7 @@ main()
   exit(0);
 }
 EOF
-if { (eval echo configure:601: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:608: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_sizeof_long_double=`cat conftestval`
 else
