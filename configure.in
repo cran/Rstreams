@@ -1,4 +1,5 @@
 AC_INIT(src/Rstreams.c)
 AC_CONFIG_HEADER(src/config.h)
 AC_CHECK_FUNCS(ftruncate)
+AC_CHECK_SIZEOF(long double, 0)
 AC_OUTPUT()

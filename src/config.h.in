@@ -1,1 +1,2 @@
 #undef HAVE_FTRUNCATE
+#undef SIZEOF_LONG_DOUBLE

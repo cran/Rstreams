@@ -19,7 +19,7 @@ readlines(stream, n = 1, bufsize = 256,
 \arguments{
   \item{stream}{a previously opened stream.}
   \item{n}{the number of items to read.}
-  \item{size}{the size of each items, in bytes.}
+  \item{size}{the size of each item, in bytes.}
   \item{signed}{whether to interpret integer data as signed or unsigned.}
   \item{swapbytes}{whether to change little- to big-endian or vice versa.}
   \item{len}{the number of characters to read into each string.}
@@ -38,7 +38,8 @@ readlines(stream, n = 1, bufsize = 256,
   are supported in R will be returned in a vector of doubles.)
 
   Floats of sizes \code{float}, \code{double} and \code{long double}
-  can be read.  Complex values using
+  can be read (where \code{long double} might be 10, 12 or 16 bytes or
+  even the same type as \code{double}).  Complex values using
   any of the float sizes for the real and complex parts can be read.  Any
   size of character string that you can create can be read.
 

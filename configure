@@ -577,6 +577,45 @@ else
 fi
 done
 
+echo $ac_n "checking size of long double""... $ac_c" 1>&6
+echo "configure:582: checking size of long double" >&5
+if eval "test \"`echo '$''{'ac_cv_sizeof_long_double'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test "$cross_compiling" = yes; then
+  ac_cv_sizeof_long_double=0
+else
+  cat > conftest.$ac_ext <<EOF
+#line 590 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+main()
+{
+  FILE *f=fopen("conftestval", "w");
+  if (!f) exit(1);
+  fprintf(f, "%d\n", sizeof(long double));
+  exit(0);
+}
+EOF
+if { (eval echo configure:601: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+then
+  ac_cv_sizeof_long_double=`cat conftestval`
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -fr conftest*
+  ac_cv_sizeof_long_double=0
+fi
+rm -fr conftest*
+fi
+
+fi
+echo "$ac_t""$ac_cv_sizeof_long_double" 1>&6
+cat >> confdefs.h <<EOF
+#define SIZEOF_LONG_DOUBLE $ac_cv_sizeof_long_double
+EOF
+
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure

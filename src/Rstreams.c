@@ -133,7 +133,9 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
     int i, n = *pn, size = *psize, *p1;
     float f1;
     double d1;
+#if SIZEOF_LONG_DOUBLE > 8
     long double e1;
+#endif
     unsigned int ui1, *p2;
 
 
@@ -173,11 +175,13 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
 	    if (*swapbytes) swap(&d1, size);
 	    result[i] = d1;
 	    break;
+#if SIZEOF_LONG_DOUBLE > 8
 	case sizeof(long double):
 	    if (read(*handle, &e1, size) <= 0) goto enddata;
 	    if (*swapbytes) swap(&e1, size);
 	    result[i] = (double) e1;
 	    break;
+#endif
 	default:
 	    error("That size is unknown on this machine");
 	}
@@ -258,7 +262,9 @@ void writefloat(int *handle, int *pn, int *psize, int *toint,
     int i, n = *pn, size = *psize;
     float f1;
     double d1;
+#if SIZEOF_LONG_DOUBLE > 8
     long double e1;
+#endif
 
     if (*toint) error("not yet implemented");
     /* and I don't see how to do so portably on a 32-bit machine */
@@ -274,11 +280,13 @@ void writefloat(int *handle, int *pn, int *psize, int *toint,
 	    if (*swapbytes) swap(&d1, size);
 	    write(*handle, &d1, size);
 	    break;
+#if SIZEOF_LONG_DOUBLE > 8
 	case sizeof(long double):
 	    e1 = (long double) data[i];
 	    if (*swapbytes) swap(&d1, size);
 	    write(*handle, &e1, size);
 	    break;
+#endif
 	default:
 	    error("That size is unknown on this machine");
 	}

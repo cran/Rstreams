@@ -1,2 +1,1 @@
 rm -f config.cache config.log config.status
-cp src/config.h.in  src/config.h
