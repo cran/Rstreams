@@ -182,40 +182,47 @@ print.stream <- function (x)
 readchar <- function (stream, n = 1, len = NA, bufsize = 256)
 {
     if (is.na(len))
-        result <- .C("readasciiz", handle = as.integer(stream),
-                     as.integer(n), as.integer(bufsize),
-                     result = rep("", n), PACKAGE = "Rstreams")
-    else result <- .C("readchar", handle = as.integer(stream),
-                      as.integer(len), as.integer(n),
-                      result = rep(paste(rep(" ", len), collapse = ""), n),
-                      PACKAGE = "Rstreams")
-    result$result
+        res <- .C("readasciiz", handle = as.integer(stream),
+                  n = as.integer(n), as.integer(bufsize),
+                  result = rep("", n), PACKAGE = "Rstreams")
+    else res <- .C("readchar", handle = as.integer(stream),
+                   as.integer(len), n = as.integer(n),
+                   result = rep(paste(rep(" ", len), collapse = ""), n),
+                   PACKAGE = "Rstreams")
+    res$result[seq(len=res$n)]
 }
 
 readcomplex <- function (stream, n = 1, size = 8, swapbytes = FALSE)
-    .C("readfloat", handle = as.integer(stream),
-       as.integer(2 * n), as.integer(size), as.integer(0),
-       as.logical(swapbytes), result = complex(n),
-       PACKAGE = "Rstreams")$result
+{
+    res <- .C("readfloat", handle = as.integer(stream),
+              as.integer(2 * n), as.integer(size), as.integer(0),
+              as.logical(swapbytes), result = complex(n),
+              PACKAGE = "Rstreams")
+    res$result[seq(len=res$n/2)]
+}
 
 readfloat <- function (stream, n = 1, size = 8, swapbytes = FALSE)
-    .C("readfloat", handle = as.integer(stream), as.integer(n),
+{
+    res <- .C("readfloat", handle = as.integer(stream), n = as.integer(n),
        as.integer(size), as.integer(0), as.logical(swapbytes),
-       result = double(n), PACKAGE = "Rstreams")$result
-
+       result = double(n), PACKAGE = "Rstreams")
+    res$result[seq(len=res$n)]
+}
 
 readint <- function (stream, n = 1, size = 4, signed = TRUE, swapbytes = FALSE)
 {
     if (size < 4 | (size == 4 & signed))
-        .C("readint", handle = as.integer(stream),
-           as.integer(n), as.integer(size), as.logical(signed),
-           as.logical(swapbytes), result = integer(n),
-           PACKAGE = "Rstreams")$result
-    else .C("readfloat", handle = as.integer(stream),
-            as.integer(n), as.integer(size),
-            as.integer(1 + as.logical(signed)),
-            as.logical(swapbytes), result = double(n),
-            PACKAGE = "Rstreams")$result
+        res <- .C("readint", handle = as.integer(stream),
+                  n = as.integer(n), as.integer(size), as.logical(signed),
+                  as.logical(swapbytes), result = integer(n),
+                  PACKAGE = "Rstreams")
+    else
+        res <- .C("readfloat", handle = as.integer(stream),
+                  n = as.integer(n), as.integer(size),
+                  as.integer(1 + as.logical(signed)),
+                  as.logical(swapbytes), result = double(n),
+                  PACKAGE = "Rstreams")
+    res$result[seq(len=res$n)]
 }
 
 readSfile <- function (filename, swapbytes = FALSE)

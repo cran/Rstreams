@@ -1,6 +1,6 @@
 Package: Rstreams
-Version: 0.2
-Date: 2000/07/27
+Version: 0.3
+Date: 2000/08/15
 Title: Binary file stream support functions
 Author: Duncan Murdoch <murdoch@stats.uwo.ca> and Brian Ripley
 Depends: 

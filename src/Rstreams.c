@@ -60,7 +60,7 @@ void closestream(int *handle)
 {
     int fd = *handle;
     stream_modes[fd] = 0;
-    /* more important to close file that to not free memory */
+    /* more important to close file than to not free memory */
     if (close(fd)) error("closing stream failed");
     Free(stream_names[fd]);
 }
@@ -74,16 +74,15 @@ void seek(int *handle, int *offset, int *origin)
 
 void readasciiz(int *handle, int *pn, int *bufsize, char **result)
 {
-    int i, j, n = *pn, end, size, bfs = *bufsize, pfs;
+    int i, j, n = *pn, end, size, bfs = *bufsize, pfs, nread;
     char buf[bfs], *p;
     off_t pos;
 
     for (i = 0; i < n; i++) {
 	pos = lseek(*handle, 0, SEEK_CUR);
-	if (read(*handle, buf, bfs) < 0)
-	    error("stream read error");
+	if ((nread = read(*handle, buf, bfs)) <= 0) break;
 	end = -1;
-	for (j = 0; j < bfs; j++)
+	for (j = 0; j < nread; j++)
 	    if (buf[j] == '\0') {
 		end = j;
 		break;
@@ -91,20 +90,22 @@ void readasciiz(int *handle, int *pn, int *bufsize, char **result)
 	if (end >= 0) {
 	    result[i] = R_alloc(1, end + 1);
 	    strcpy(result[i], buf);
-	    lseek(*handle, end - bfs + 1, SEEK_CUR);
-	} else { /* a long string, so try harder */
+	    lseek(*handle, pos + end + 1, SEEK_SET);
+	} else if (nread < bfs) break;
+	else { /* a long string, so try harder */
 	    pfs = 10*bfs;
 	    p = Calloc(pfs, char);
 	    memcpy(buf, p, bfs);
 	    size = bfs;
 	    while(1) {
-		if (read(*handle, buf, bfs) < 0) error("stream read error");
+		if ((nread = read(*handle, buf, bfs) < 0)) goto enddata;
 		end = -1;
-		for (j = 0; j < bfs; j++)
+		for (j = 0; j < nread; j++)
 		    if (buf[j] == '\0') {
 			end = j;
 			break;
 		    }
+		if (nread < bfs && end < 0) goto enddata;
 		if (size >= pfs) {
 		    pfs *= 2;
 		    p = Realloc(p, pfs, char);
@@ -116,9 +117,11 @@ void readasciiz(int *handle, int *pn, int *bufsize, char **result)
 	    result[i] = R_alloc(1, size + 1);
 	    strcpy(result[i], p);
 	    Free(p);
-	    lseek(*handle, size - bfs + 1, SEEK_CUR);
+	    lseek(*handle, pos + size + 1, SEEK_SET);
 	}
     }
+ enddata:
+    if(i < n) *pn = i;
 }
 
 
@@ -126,8 +129,8 @@ void readchar(int *handle, int *len, int *pn, char **result)
 {
     int i, n = *pn;
     for (i = 0; i < n; i++)
-	if (read(*handle, result[i], *len) < 0)
-	    error("stream read error");
+	if (read(*handle, result[i], *len) <= 0) break;
+    if (i < n) *pn = i;
 }
 
 
@@ -143,40 +146,37 @@ void readint(int *handle, int *pn, int *psize, int *signd,
     for (i = 0; i < n; i++) {
 	switch (size) {
 	case 4:
-	    if (read(*handle, result+i, size) < 0)
-		error("stream read error");
-	    if (*swapbytes) {swap(result+i, size);
-	    }
-	    
+	    if (read(*handle, result+i, size) <= 0) goto enddata;
+	    if (*swapbytes) swap(result+i, size);
 	    break;
 	case 2:
 	    if (*signd) {
-		if (read(*handle, &s1, size) < 0)
-		    error("stream read error");
+		if (read(*handle, &s1, size) <= 0) goto enddata;
 		if (*swapbytes) swap(&s1, size);
 		result[i] = (int) s1;
 	    } else {
-		if (read(*handle, &us1, size) < 0)
-		    error("stream read error");
+		if (read(*handle, &us1, size) <= 0) goto enddata;
 		if (*swapbytes) swap(&us1, size);
 		result[i] = (int) us1;
 	    }
 	    break;
 	case 1:
 	    if (*signd) {
-		if (read(*handle, &c1, 1) < 0)
-		    error("stream read error");
+		if (read(*handle, &c1, 1) <= 0) goto enddata;
 		result[i] = (int) c1;
 	    } else {
-		if (read(*handle, &uc1, 1) < 0)
-		    error("stream read error");
+		if (read(*handle, &uc1, 1) <= 0) goto enddata;
 		result[i] = (int) uc1;
 	    }
 	    break;
 	default:
-	    error("size must be 1,2,4");
+	    error("size must be 1, 2 or 4");
 	}
     }
+    return;
+ enddata:
+    *pn = i;
+    return;
 }
 
 void readfloat(int *handle, int *pn, int *psize, int *fromint,
@@ -193,12 +193,12 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
 	for (i = 0; i < n; i++) {
 	    switch (size) {
 	    case 4: /* must be unsigned */
-		read(*handle, &ui1, size);
+		if (read(*handle, &ui1, size) <= 0) goto enddata;
 		if (*swapbytes) swap(&ui1, size);
 		result[i] = (double) f1;
 		break;
 	    case 8: 
-		read(*handle, &d1, size);
+		if (read(*handle, &d1, size) <= 0) goto enddata;
 		if (*swapbytes) swap(&d1, size);
 /* I suspect these need to be swapped by endian-ness */
 		if (*fromint > 1) { /* signed */
@@ -216,17 +216,17 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
     for (i = 0; i < n; i++) {
 	switch (size) {
 	case 4:
-	    read(*handle, &f1, size);
+	    if (read(*handle, &f1, size) <= 0) goto enddata;
 	    if (*swapbytes) swap(&f1, size);
 	    result[i] = (double) f1;
 	    break;
 	case 8:
-	    read(*handle, &d1, size);
+	    if (read(*handle, &d1, size) <= 0) goto enddata;
 	    if (*swapbytes) swap(&d1, size);
 	    result[i] = d1;
 	    break;
 	case sizeof(long double):
-	    read(*handle, &e1, size);
+	    if (read(*handle, &e1, size) <= 0) goto enddata;
 	    if (*swapbytes) swap(&e1, size);
 	    result[i] = (double) e1;
 	    break;
@@ -234,6 +234,10 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
 	    error("That size is unknown on this machine");
 	}
     }
+    return;
+ enddata:
+    *pn = i;
+    return;
 }
 
 

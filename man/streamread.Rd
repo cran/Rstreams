@@ -8,10 +8,10 @@
   Reads binary data from the current position within a stream.
 }
 \usage{
-readint(stream, n, size=4, signed=TRUE, swapbytes=FALSE)
-readfloat(stream, n, size=8, swapbytes=FALSE)
-readcomplex(stream, n, size=8, swapbytes=FALSE)
-readchar(stream, len, n=1)
+readint(stream, n, size = 4, signed = TRUE, swapbytes = FALSE)
+readfloat(stream, n, size = 8, swapbytes = FALSE)
+readcomplex(stream, n, size = 8, swapbytes = FALSE)
+readchar(stream, n = 1, len = NA, bufsize = 256)
 }
 \arguments{
   \item{stream}{a previously opened stream}
@@ -20,9 +20,12 @@ readchar(stream, len, n=1)
   \item{signed}{whether to interpret integer data as signed or unsigned}
   \item{swapbytes}{whether to change little- to big-endian or vice versa}
   \item{len}{the number of characters to read into each string}
+  \item{bufsize}{the buffer size to be used for a string if \code{len = NA}.}
 }
 \value{
-  a vector of integers, doubles, complex values or character strings
+  A vector of integers, doubles, complex values or character strings.
+  This may be shorter than requested if there was insufficient data on
+  the file.
 }
 \details{
   Signed integers of sizes 1, 2, 4, and 8 bytes can be read.  Unsigned
@@ -34,11 +37,14 @@ readchar(stream, len, n=1)
   any of the float sizes for the real and complex parts can be read.  Any
   size of character string that you can create can be read.
 
-  If \code{swapbytes=TRUE}, then when reading any multi-byte numbers, the
+  If \code{swapbytes = TRUE}, then when reading any multi-byte numbers, the
   byte order within the number will be swapped.  This allows you to read
   data that was written on a machine that uses a different convention for
   numeric storage, i.e. read little-endian data from a big-endian machine,
   or vice versa.
+
+  \code{readchar} can either read strings of fixed size given by
+  \code{len}, or if \code{len = NA}, ASCII-zero-delimited strings.
 }
 \examples{
 s <- openstream("mydata", "write")
