@@ -8,7 +8,7 @@
   that were produced in S-PLUS.
 }
 \usage{
-  data.restore(filename, print = FALSE, verbose = FALSE)
+  data.restore(filename, print = FALSE, verbose = FALSE, env = .GlobalEnv)
   readSfile(filename, swapbytes = FALSE)
 
   SModeNames
@@ -18,6 +18,7 @@
   \item{swapbytes}{whether to change big to little-endian or vice versa.}
   \item{print}{whether to print the name of each object as read from the file.}
   \item{verbose}{whether to print the name of every subitem within each object.}
+  \item{env}{environment within which to create the restored object.}
 }
 \value{
   an R version of the S-PLUS object.

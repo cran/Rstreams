@@ -73,7 +73,7 @@ readSfile <- function (filename, swapbytes = FALSE)
 	        	result <- ReadSObj(6, len)
 			if (code == "function")
 			  try(result <- as.function(result,env=.GlobalEnv))
-            else if (code %in% c('break','if','for','return','S.call','while','<-','<<-','(','{')) 
+            else if (code %in% c('break','if','for','return','S.call','while','<-','<<-','(','{'))
                 result <- as.call(c(as.name(code),result))
             else if (code == "call(...)")  # these aren't special in R
                 result <- result[[1]]
@@ -108,7 +108,8 @@ readSfile <- function (filename, swapbytes = FALSE)
     else stop("not an S object")
 }
 
-"data.restore" <- function (filename, print = F, verbose = F, env = .GlobalEnv) 
+data.restore <-
+    function (filename, print = FALSE, verbose = FALSE, env = .GlobalEnv)
 {
     dump <- openstream(filename)
     on.exit(closestream(dump))
@@ -134,9 +135,9 @@ readSfile <- function (filename, swapbytes = FALSE)
             if (code == "name") {
                 value <- as.name(value)
             }
-			if (code == "missing") {   ## Workaround:  should be value <- as.name("")
-			    value <- call('stop',paste('Argument \"',name,'\" is missing',sep=''))
-		  	}
+            if (code == "missing") {   ## Workaround:  should be value <- as.name("")
+                value <- call('stop', paste('Argument \"',name,'\" is missing',sep=''))
+            }
         }
         else if (code == "complex") {
             value <- as.complex(readlines(dump, len, eol = eol))
@@ -166,7 +167,7 @@ readSfile <- function (filename, swapbytes = FALSE)
             }
             else if (code == "function")
                 try(value <- as.function(value,env=env))
-            else if (code %in% c('break','if','for','return','S.call','while','<-','<<-','(','{')) 
+            else if (code %in% c('break','if','for','return','S.call','while','<-','<<-','(','{'))
                 value <- as.call(c(as.name(code),value))
             else if (code == "NULL") value <- as.name(name)
             else if (code == "call(...)")  # these aren't special in R
@@ -175,8 +176,8 @@ readSfile <- function (filename, swapbytes = FALSE)
                 value <- NULL
             else if (code == "comment.expression")  # just keep the expression, not the comment
                 value <- value[unlist(lapply(value,function(y) !is.null(y)))][[1]]
-			else if (code == "internal")
-			    value <- as.call(list(as.name('.Internal'),value[[1]]))
+            else if (code == "internal")
+                value <- as.call(list(as.name('.Internal'),value[[1]]))
 
             else try(mode(value) <- code)
         }

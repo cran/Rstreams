@@ -5,10 +5,11 @@
   Examines a stream to determine the end-of-line marker.
 }
 \usage{
-  getstreameol(s)
+  getstreameol(stream, bufsize = 256)
 }
 \arguments{
-  \item{s}{an already opened stream.}
+  \item{stream}{an already opened stream.}
+  \item{bufsize}{buffer size for use by \code{\link{readchar}}.}
 }
 \value{A character variable holding the end-of-line marker.}
 \details{

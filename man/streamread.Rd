@@ -9,9 +9,9 @@
   Reads binary data from the current position within a stream.
 }
 \usage{
-readint(stream, n, size = 4, signed = TRUE, swapbytes = FALSE)
-readfloat(stream, n, size = 8, swapbytes = FALSE)
-readcomplex(stream, n, size = 8, swapbytes = FALSE)
+readint(stream, n = 1, size = 4, signed = TRUE, swapbytes = FALSE)
+readfloat(stream, n = 1, size = 8, swapbytes = FALSE)
+readcomplex(stream, n = 1, size = 8, swapbytes = FALSE)
 readchar(stream, n = 1, len = NA, bufsize = 256)
 readlines(stream, n = 1, bufsize = 256,
           eol = getstreameol(stream, bufsize))

@@ -16,8 +16,8 @@ closestream <- function (stream)
     invisible()
 }
 
-copystream <- function (s1, s2, nbytes)
-    .C("copystream", h1 = as.integer(s1), h2 = as.integer(s2),
+copystream <- function (src, dest, nbytes)
+    .C("copystream", as.integer(src), as.integer(dest),
        nbytes = as.integer(nbytes), PACKAGE = "Rstreams")$nbytes
 
 getstreameol <- function(stream, bufsize = 256)
