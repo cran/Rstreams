@@ -19,6 +19,9 @@
   The default is to dump the rest of the stream; if a shorter length
   is given, only that many bytes will be read and displayed.
 }
+\seealso{
+  \code{\link{openstream}}
+}
 \examples{
 s <- openstream("mydata", "write")
 writeint(s, 1:100, 1)

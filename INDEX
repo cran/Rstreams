@@ -1,10 +1,11 @@
 allstreams               Get All Open Streams
 copystream               Copy from One Stream to Another
+getstreameol             Determine a Stream's End-of-Line Marker
 hexdump                  Display a Hex Dump of a Stream
 inttostr                 Converts Integers to Strings in Different Bases
 openstream               Open or Close a Stream
-readSfile                Read an S-PLUS Binary File
 seekstream               Set Binary Stream to New Position
+S-PLUS read functions    Read an S-PLUS Binary File
 Stream read functions    Read Binary Data from a Stream
 Stream write functions   Write Binary Data to a Stream
 truncate                 Truncate a Binary Stream

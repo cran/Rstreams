@@ -38,6 +38,9 @@ writechar(stream, data, asciiz = FALSE)
   If \code{asciiz = FALSE} (the default), there is no separator between the
   components of a character vector being written.
 }
+\seealso{
+  \code{\link{openstream}}, \code{\link{readint}}
+}
 \examples{
 sampledata <- 1:100
 s <- openstream("mydata", "write")

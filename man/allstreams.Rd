@@ -13,6 +13,9 @@
 \details{
   Only currently open streams will be returned.
 }
+\seealso{
+  \code{\link{openstream}}
+}
 \examples{
 # Print a list of all open streams
 allstreams()

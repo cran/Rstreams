@@ -21,6 +21,9 @@
   the current position, or \code{"end"}, in which case it is relative to
   the end of the file.
 }
+\seealso{
+  \code{\link{openstream}}
+}
 \examples{
 s <- openstream("mydata", "write")
 # Write the bytes from 1 to 100 to the file

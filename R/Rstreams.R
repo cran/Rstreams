@@ -1,84 +1,3 @@
-ReadSObj <- function (s, code, len, swapbytes)
-{
-    if (code == 1)
-        result <- as.logical(readint(s, len, swapbytes = swapbytes))
-    else if (code == 2)
-        result <- readint(s, len, swapbytes = swapbytes)
-    else if (code == 3)
-        result <- readfloat(s, len, 4, swapbytes = swapbytes)
-    else if (code == 4)
-        result <- readfloat(s, len, swapbytes = swapbytes)
-    else if (code == 5) {
-        charsize <- readint(s, swapbytes = swapbytes)
-        newpos <- charsize + summary(s)$position
-        result <- readchar(s, len, bufsize = charsize)
-        seekstream(s, newpos)
-    }
-    else if (code == 6) {
-        result <- as.list(integer(len))
-        names(result) <- ReadSObj(s, 5, len, swapbytes)
-        codes <- ReadSObj(s, 2, len, swapbytes)
-        lens <- ReadSObj(s, 2, len, swapbytes)
-        offsets <- ReadSObj(s, 2, len, swapbytes)
-        if (all(names(result) == rep("", len)))
-            names(result) <- NULL
-        if (len > 0) {
-            savenames <- names(result)
-            names(result) <- 1:len
-            for (i in 1:len) {
-                seekstream(s, offsets[i])
-                result <- do.call("$<-", list(result, as.character(i),
-                  ReadSObj(s, codes[i], lens[i], swapbytes)))
-            }
-            if (length(savenames) == len)
-                names(result) <- savenames
-            else names(result) <- NULL
-        }
-    }
-    else if (code == 7)
-        result <- readcomplex(s, len, swapbytes = swapbytes)
-    else if (code == 21) {
-        temp <- ReadSObj(s, 6, len, swapbytes)
-        result <- temp[[".Data"]]
-        attributes(result) <- temp[-match(c(".Data", ".Dim",
-            ".Dimnames", ".Label"), names(temp), nomatch = 0)]
-        dim(result) <- temp[[".Dim"]]
-        names(result) <- names(temp[[".Data"]])
-        if (!is.null(temp[[".Label"]]))
-            levels(result) <- temp[[".Label"]]
-        if (!is.null(temp[[".Dimnames"]]))
-            dimnames(result) <- temp[[".Dimnames"]]
-    }
-    else if (code == 257) {
-        result <- ReadSObj(s, 5, len, swapbytes)
-        mode(result) <- "name"
-    }
-    else if (code %in% 258:322) {
-        result <- ReadSObj(s, 6, len, swapbytes)
-        as.fn <- paste("as.", SModeNames[code - 256], sep = "")
-        if (exists(as.fn))
-            result <- eval(call(as.fn, result))
-        else warning(paste("R does not support mode ", code,
-            " (", SModeNames[code - 256], ")", sep = ""))
-    }
-    else {
-        return(paste("Unrecognized S mode", code, "not supported"))
-    }
-    result
-}
-
-"SModeNames" <-
-c("name", "string", "literal", "compiled", "(", ")", "[", "]",
-"{", "}", ",", "=", "!", ":", "addop", "*/", "<dummy>", "^",
-"-", "$", "logop", "&|", "<-", "->", "sp.op", " ", "repeat",
-"if", "else", "break", ";", "next", "while", "for", "in", "recursive.return",
-"return", "argument", "system", "end.of.file", "expression",
-"system.function", "missing", "call", "function", "?", "unbalanced",
-"[[", "unknown", "]]", "quit", "continue", "comment.expression",
-"vector", "call(...)", "<<-", "graphics", "arg.lvalue", "internal",
-"S.call", "abort", "code 318", "comment", "comment (leftover)",
-"frame", "destination")
-
 allstreams <- function ()
 {
     result <- integer(.C("streamcount", count = as.integer(0),
@@ -100,6 +19,36 @@ closestream <- function (stream)
 copystream <- function (s1, s2, nbytes)
     .C("copystream", h1 = as.integer(s1), h2 = as.integer(s2),
        nbytes = as.integer(nbytes), PACKAGE = "Rstreams")$nbytes
+
+getstreameol <- function(stream, bufsize = 256)
+{
+    ## Look for CR, LF, or CR/LF in stream
+
+    startpos <- summary(stream)$position
+    streamlen <- summary(stream)$size - startpos
+    on.exit(seekstream(stream,startpos))
+    result <- ""
+    buffer <- character(0)
+    while ((nchar(result) == 0) & (length(buffer) < streamlen))
+    {
+        buffer <- c(buffer,readchar(stream, bufsize, len=1))
+        eol <- seq(len = length(buffer)-1)[buffer[-length(buffer)] %in% c('\r','\n')]
+        if (length(eol) > 0)
+        {
+            if ((buffer[eol[1]] == '\r') & (buffer[eol[1]+1] == '\n'))
+                result <- '\r\n'
+            else
+                result <- buffer[eol[1]]
+            return(result)
+        }
+    }
+
+    ## Might have missed the very last character
+
+    if ((length(buffer) > 0) && (buffer[length(buffer)] %in% c('\r','\n')))
+        result <- buffer[length(buffer)]
+    result
+}
 
 hexdump <- function (s, len = summary(s)$size - summary(s)$position)
 {
@@ -182,20 +131,20 @@ print.stream <- function (x)
 readchar <- function (stream, n = 1, len = NA, bufsize = 256)
 {
     if (is.na(len))
-        res <- .C("readasciiz", handle = as.integer(stream),
-                  n = as.integer(n), as.integer(bufsize),
-                  result = rep("", n), PACKAGE = "Rstreams")
-    else res <- .C("readchar", handle = as.integer(stream),
+        readlines(stream,n,bufsize,eol='\0')
+    else {
+        res <- .C("readchar", handle = as.integer(stream),
                    as.integer(len), n = as.integer(n),
                    result = rep(paste(rep(" ", len), collapse = ""), n),
                    PACKAGE = "Rstreams")
-    res$result[seq(len=res$n)]
+        res$result[seq(len=res$n)]
+    }
 }
 
 readcomplex <- function (stream, n = 1, size = 8, swapbytes = FALSE)
 {
     res <- .C("readfloat", handle = as.integer(stream),
-              as.integer(2 * n), as.integer(size), as.integer(0),
+              n = as.integer(2 * n), as.integer(size), as.integer(0),
               as.logical(swapbytes), result = complex(n),
               PACKAGE = "Rstreams")
     res$result[seq(len=res$n/2)]
@@ -225,25 +174,16 @@ readint <- function (stream, n = 1, size = 4, signed = TRUE, swapbytes = FALSE)
     res$result[seq(len=res$n)]
 }
 
-readSfile <- function (filename, swapbytes = FALSE)
+readlines <- function (stream, n = 1, bufsize = 256,
+                       eol = getstreameol(stream, bufsize))
 {
-    s <- openstream(filename, "read")
-    on.exit(closestream(s))
-    if ((readint(s, 1, 1) == 0) && (readchar(s, 1, 6) == "S data") &&
-        (readint(s, 1, 1) == 1)) {
-        code <- readint(s, swapbytes = swapbytes)
-        if (code < 0 | code > 65535) {
-            swapbytes <- !swapbytes
-            seekstream(s, -4, "current")
-            code <- readint(s, swapbytes = swapbytes)
-            warning(paste("Changed swapbytes to", swapbytes))
-            if (code < 0 | code > 65535)
-                stop("Internal error - illegal S code value\n")
-        }
-        len <- readint(s, swapbytes = swapbytes)
-        return(ReadSObj(s, code, len, swapbytes = swapbytes))
-    }
-    else stop("not an S object")
+    if (n > 0) {
+        eol <- as.character(eol)
+        res <- .C("readlines", handle = as.integer(stream),
+                  n = as.integer(n), as.integer(bufsize), eol,
+                  result = character(n), PACKAGE = "Rstreams")
+        res$result[seq(len=res$n)]
+    } else character(0)
 }
 
 seekstream <- function (stream, offset, origin = "start")

@@ -72,58 +72,6 @@ void seek(int *handle, int *offset, int *origin)
 	  (*origin == 2 ? SEEK_CUR : SEEK_END));
 }
 
-void readasciiz(int *handle, int *pn, int *bufsize, char **result)
-{
-    int i, j, n = *pn, end, size, bfs = *bufsize, pfs, nread;
-    char buf[bfs], *p;
-    off_t pos;
-
-    for (i = 0; i < n; i++) {
-	pos = lseek(*handle, 0, SEEK_CUR);
-	if ((nread = read(*handle, buf, bfs)) <= 0) break;
-	end = -1;
-	for (j = 0; j < nread; j++)
-	    if (buf[j] == '\0') {
-		end = j;
-		break;
-	    }
-	if (end >= 0) {
-	    result[i] = R_alloc(1, end + 1);
-	    strcpy(result[i], buf);
-	    lseek(*handle, pos + end + 1, SEEK_SET);
-	} else if (nread < bfs) break;
-	else { /* a long string, so try harder */
-	    pfs = 10*bfs;
-	    p = Calloc(pfs, char);
-	    memcpy(buf, p, bfs);
-	    size = bfs;
-	    while(1) {
-		if ((nread = read(*handle, buf, bfs) < 0)) goto enddata;
-		end = -1;
-		for (j = 0; j < nread; j++)
-		    if (buf[j] == '\0') {
-			end = j;
-			break;
-		    }
-		if (nread < bfs && end < 0) goto enddata;
-		if (size >= pfs) {
-		    pfs *= 2;
-		    p = Realloc(p, pfs, char);
-		}
-		memcpy(buf, p + size, bfs);
-		size += (end > 0) ? end : bfs;
-		if (end >= 0) break;
-	    }
-	    result[i] = R_alloc(1, size + 1);
-	    strcpy(result[i], p);
-	    Free(p);
-	    lseek(*handle, pos + size + 1, SEEK_SET);
-	}
-    }
- enddata:
-    if(i < n) *pn = i;
-}
-
 
 void readchar(int *handle, int *len, int *pn, char **result)
 {
@@ -187,7 +135,7 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
     double d1;
     long double e1;
     unsigned int ui1, *p2;
-    
+
 
     if (*fromint) {
 	for (i = 0; i < n; i++) {
@@ -197,7 +145,7 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
 		if (*swapbytes) swap(&ui1, size);
 		result[i] = (double) f1;
 		break;
-	    case 8: 
+	    case 8:
 		if (read(*handle, &d1, size) <= 0) goto enddata;
 		if (*swapbytes) swap(&d1, size);
 /* I suspect these need to be swapped by endian-ness */
@@ -240,6 +188,60 @@ void readfloat(int *handle, int *pn, int *psize, int *fromint,
     return;
 }
 
+void readlines(int *handle, int *pn, int *bufsize, char **eol,
+	       char **result)
+{
+    int i = 0, inpos = *bufsize, outpos	= 0, ibfs = *bufsize,
+	obfs = *bufsize, match = 0, neol;
+    char *inbuf, *outbuf, *eolc = *eol, null[2];
+
+    neol = strlen(eolc);
+    inbuf = Calloc(ibfs, char);
+    if (neol == 0) { /* Handle \0 terminator specially */
+	null[0] = 0;
+	null[1] = 0;
+	eolc = &(null[0]);
+	neol = 1;
+    }
+
+    outbuf = Calloc(obfs, char);
+
+    while (1) {
+	if (inpos >= ibfs) { /* recharge the buffer? */
+	    if ((ibfs = read(*handle, inbuf, ibfs)) <= 0) {
+		/* fake an end of line marker at the end of file */
+		outpos += neol - 1;
+		match = neol;
+		inbuf[0] = '\0';
+	    }
+	    inpos = 0;
+	}
+	if (inbuf[inpos] == eolc[match]) match++;
+	else match = 0;
+
+	if (outpos >= obfs) { /* not at eol yet, buffer not big enough */
+	    obfs *= 2;
+	    outbuf = Realloc(outbuf, obfs, char);
+	}
+	outbuf[outpos++] = inbuf[inpos++];
+	if (match >= neol) {	/* matched eol string */
+	    outpos -= neol;
+	    result[i] = R_alloc(1, outpos + 1);
+	    memcpy(result[i], outbuf, outpos);
+	    result[i][outpos] = '\0';
+	    if ( (ibfs > 0) | (outpos > 0) ) i++;
+	    if ( (i >= *pn) | (ibfs <= 0) ) {  /* all done! */
+		*pn = i;
+		Free(outbuf);
+		if (ibfs > 0) lseek(*handle, inpos - ibfs, SEEK_CUR);
+		break;
+	    }
+	    outpos = 0;
+	    match = 0;
+	}
+    }
+    Free(inbuf);
+}
 
 void writechar(int *handle, int *pn, int *asciiz, char **data)
 {
@@ -385,12 +387,13 @@ void closeallstreams()
 
 void copystream(int *h1, int *h2, int *nbytes)
 {
-    char buf[*nbytes];
+    char *buf;
     int nin;
 
+    buf = Calloc(*nbytes, char);
     nin = read(*h1, buf, *nbytes);
     if (nin < 0) error("stream read error");
     write(*h2, buf, nin);
     *nbytes = nin;
+    Free(buf);
 }
-

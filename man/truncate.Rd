@@ -17,6 +17,9 @@
   This function will truncate the file at the current position.  Any data
   after this position will be deleted.  
 }
+\seealso{
+  \code{\link{openstream}}
+}
 \examples{
 \dontrun{s <- openstream("mydata", "write")
 # Write the bytes from 1 to 10 to the file, and truncate after them

@@ -3,6 +3,7 @@
 \alias{readfloat}
 \alias{readchar}
 \alias{readcomplex}
+\alias{readlines}
 \title{Read Binary Data from a Stream}
 \description{
   Reads binary data from the current position within a stream.
@@ -12,6 +13,8 @@ readint(stream, n, size = 4, signed = TRUE, swapbytes = FALSE)
 readfloat(stream, n, size = 8, swapbytes = FALSE)
 readcomplex(stream, n, size = 8, swapbytes = FALSE)
 readchar(stream, n = 1, len = NA, bufsize = 256)
+readlines(stream, n = 1, bufsize = 256,
+          eol = getstreameol(stream, bufsize))
 }
 \arguments{
   \item{stream}{a previously opened stream.}
@@ -20,7 +23,9 @@ readchar(stream, n = 1, len = NA, bufsize = 256)
   \item{signed}{whether to interpret integer data as signed or unsigned.}
   \item{swapbytes}{whether to change little- to big-endian or vice versa.}
   \item{len}{the number of characters to read into each string.}
-  \item{bufsize}{the buffer size to be used for a string if \code{len = NA}.}
+  \item{bufsize}{the initial buffer size to be used when reading variable
+    length strings.  This will be grown as needed.}
+  \item{eol}{the end of line marker}
 }
 \value{
   A vector of integers, doubles, complex values or character strings.
@@ -45,14 +50,26 @@ readchar(stream, n = 1, len = NA, bufsize = 256)
 
   \code{readchar} can either read strings of fixed size given by
   \code{len}, or if \code{len = NA}, ASCII-zero-delimited strings.
+
+  \code{readlines} can read variable length strings with arbitrary
+  end of line markers.  See \code{\link{getstreameol}} for the default
+  choice of end of line marker.
+}
+\seealso{
+  \code{\link{openstream}}, \code{\link{writeint}},
+  \code{\link{getstreameol}}
 }
 \examples{
+## find out endian-ness
+if(R.version$major == 1 && R.version$minor >= 2.0) .Platform$endian
+
 s <- openstream("mydata", "write")
 writeint(s, 1:10, 1)
 writeint(s, 21:30, 2)
 writeint(s, 41:50, 4)
 writefloat(s, 401:410, 4)
 writefloat(s, 801:810, 8)
+writechar(s, c("a string", "or two"), asciiz = TRUE)
 closestream(s)
 
 s <- openstream("mydata", "read")
@@ -61,7 +78,14 @@ readint(s, 10, 2)
 readint(s, 10, 4)
 readfloat(s, 10, 4)
 readfloat(s, 10, 8)
+readchar(s, 2)
 closestream(s)
+
+dump("openstream", "mydata")
+s <- openstream("mydata")
+readlines(s, 2)
+closestream(s)
+
 unlink("mydata")
 }
 \keyword{file}

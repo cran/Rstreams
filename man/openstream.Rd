@@ -22,6 +22,9 @@ closestream(stream)
 \value{
   an object of the stream class is returned by \code{openstream}.
 }
+\seealso{
+  \code{\link{readint}}, \code{\link{writeint}}, \code{\link{seekstream}}
+}
 \examples{
 s <- openstream("mydata", "write")
 s

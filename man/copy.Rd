@@ -20,6 +20,9 @@
   If you request copying more bytes than are present in the source, values
   will not be repeated:  only what is there will be copied.
 }
+\seealso{
+  \code{\link{openstream}}
+}
 \examples{
 s <- openstream("mydata", "write")
 # Write the bytes from 1 to 100 to the file
