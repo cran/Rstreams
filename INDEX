@@ -1,0 +1,17 @@
+openstream: Open a file as a stream
+closestream: Close a stream (or all streams)
+readint: Read a vector of integers from the stream
+readfloat: Read a vector of floats from the stream
+readcomplex: Read a complex vector from the stream
+readchar: Read a vector of character strings from the stream
+writeint: Write a vector of integers to the stream
+writefloat: Write a vector of floats to the stream
+writecomplex: Write a complex vector to the stream
+writechar: Write a vector of character strings to the stream
+seek: Change the current position of the stream
+truncate: Set the length of the stream
+copy: Copy from one stream to another
+allstreams: List all open streams
+inttostr: Convert integers to hexadecimal (or other base)
+hexdump: Display a hex dump of a stream
+readsfile: Reads a binary S-PLUS object file
