@@ -3,7 +3,7 @@
 \alias{readfloat}
 \alias{readchar}
 \alias{readcomplex}
-\title{Read binary data from a stream}
+\title{Read Binary Data from a Stream}
 \description{
   Reads binary data from the current position within a stream.
 }
@@ -14,12 +14,12 @@ readcomplex(stream, n, size = 8, swapbytes = FALSE)
 readchar(stream, n = 1, len = NA, bufsize = 256)
 }
 \arguments{
-  \item{stream}{a previously opened stream}
-  \item{n}{the number of items to read}
-  \item{size}{the size of each items, in bytes}
-  \item{signed}{whether to interpret integer data as signed or unsigned}
-  \item{swapbytes}{whether to change little- to big-endian or vice versa}
-  \item{len}{the number of characters to read into each string}
+  \item{stream}{a previously opened stream.}
+  \item{n}{the number of items to read.}
+  \item{size}{the size of each items, in bytes.}
+  \item{signed}{whether to interpret integer data as signed or unsigned.}
+  \item{swapbytes}{whether to change little- to big-endian or vice versa.}
+  \item{len}{the number of characters to read into each string.}
   \item{bufsize}{the buffer size to be used for a string if \code{len = NA}.}
 }
 \value{

@@ -43,13 +43,13 @@ static void swap(void *result, int size)
 void openstream(char **filename, int *mode, int *handle)
 {
     int fd;
-    char *p = filename[0];
+    char *p = R_ExpandFileName(filename[0]);
 
     if(*mode == 1)
 	fd = open(p, O_RDONLY|O_BINARY);
     else
-	fd = open(p, O_WRONLY|O_CREAT|O_BINARY, S_IRUSR|S_IWUSR);
-    if (fd == -1) error("opening `%s' failed", filename[0]);
+	fd = open(p, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, S_IRUSR|S_IWUSR);
+    if (fd == -1) error("opening `%s' failed", p);
     *handle = fd;
     stream_modes[fd] = 100 + (*mode);
     stream_names[fd] = Calloc(strlen(p)+1, char);
@@ -349,7 +349,12 @@ void Rtruncate(int *handle, int *size)
     if(ftruncate(*handle, *size))
 	error("file truncation failed");
 #else
+#  ifdef WIN32
+    if(chsize(*handle, *size))
+	error("file truncation failed");
+#  else
     error("Unavailable on this platform");
+#  endif
 #endif
 }
 

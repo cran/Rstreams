@@ -1,6 +1,6 @@
 \name{copystream}
 \alias{copystream}
-\title{Copy from one stream to another}
+\title{Copy from One Stream to Another}
 \description{
   Copies bytes from the current position of one stream to the current
   position of another.
@@ -9,14 +9,16 @@
   copystream(src, dest, nbytes)
 }
 \arguments{
-  \item{src}{a stream previously opened in read mode}
-  \item{dest}{a stream previously opened in write mode}
+  \item{src}{a stream previously opened in read mode.}
+  \item{dest}{a stream previously opened in write mode.}
   \item{nbytes}{how many bytes to copy}
 }
-\value{how many bytes were actually copied}
+\value{
+  how many bytes were actually copied.
+}
 \details{
-If you request copying more bytes than are present in the source, values
-will not be repeated:  only what is there will be copied.
+  If you request copying more bytes than are present in the source, values
+  will not be repeated:  only what is there will be copied.
 }
 \examples{
 s <- openstream("mydata", "write")

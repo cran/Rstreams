@@ -1,16 +1,16 @@
 \name{seekstream}
 \alias{seekstream}
-\title{Set binary stream to new position}
+\title{Set Binary Stream to New Position}
 \description{
   Sets a binary stream to a new position.
 }
 \usage{
-  seekstream(stream, offset, origin="start")
+  seekstream(stream, offset, origin = "start")
 }
 \arguments{
-  \item{stream}{a previously opened stream}
-  \item{offset}{the offset to seek to}
-  \item{origin}{the base to which to apply offset}
+  \item{stream}{a previously opened stream.}
+  \item{offset}{the offset to seek to.}
+  \item{origin}{the base to which to apply offset.}
 }
 \value{
   The new position of the stream.

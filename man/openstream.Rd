@@ -3,22 +3,25 @@
 \alias{closestream}
 \alias{print.stream}
 \alias{summary.stream}
-\title{Open or close a stream}
+\title{Open or Close a Stream}
 \description{
-  Open or close a file for binary reading and writing
+  Open or close a file for binary reading and writing.
 }
 \usage{
-stream <- openstream(filename, mode="read")
+stream <- openstream(filename, mode = "read")
 closestream(stream)
 }
 \arguments{
-  \item{filename}{a string containing a single filename}
+  \item{filename}{a string containing a single file name. Tilde-expansion
+    is performed on the file name.}
   \item{mode}{the mode in which to open the file, either \code{"read"}
-    or \code{"write"}}
+    or \code{"write"}.}
   \item{stream}{a previously opened stream, or the special string
-    \code{"all"} to close all streams}
+    \code{"all"} to close all streams.}
 }
-\value{an object of the stream class is returned by openstream}
+\value{
+  an object of the stream class is returned by \code{openstream}.
+}
 \examples{
 s <- openstream("mydata", "write")
 s

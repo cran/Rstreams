@@ -1,11 +1,11 @@
 \name{inttostr}
 \alias{inttostr}
-\title{Converts integers to strings in different bases}
+\title{Converts Integers to Strings in Different Bases}
 \description{
   Converts an integer to a string representation in base 2 to 36.
 }
 \usage{
-  inttostr(x, digits=0, base=16, complement=FALSE))
+  inttostr(x, digits = 0, base = 16, complement = FALSE))
 }
 \arguments{
   \item{x}{a vector of integers to display}

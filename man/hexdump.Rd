@@ -1,22 +1,23 @@
 \name{hexdump}
 \alias{hexdump}
-\title{Display a hex dump of a stream}
+\title{Display a Hex Dump of a Stream}
 \description{
   Displays a mixed hex and ascii dump of the content of a stream.
 }
 \usage{
-  hexdump(s,[len])
+  hexdump(s, len)
 }
 \arguments{
-  \item{s}{an already opened stream}
-  \item{len}{how many bytes to read and display}
+  \item{s}{an already opened stream.}
+  \item{len}{optional: how many bytes to read and display.}
 }
 \value{none}
-\details{Reads bytes from the stream and displays them on the standard
-output location, in a mixed hex and ascii display.
+\details{
+  Reads bytes from the stream and displays them on the standard
+  output location, in a mixed hex and ascii display.
 
-The default is to dump the rest of the stream; if a shorter length is given, only
-that many bytes will be read and displayed.
+  The default is to dump the rest of the stream; if a shorter length
+  is given, only that many bytes will be read and displayed.
 }
 \examples{
 s <- openstream("mydata", "write")

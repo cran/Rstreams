@@ -1,6 +1,6 @@
 \name{truncate}
 \alias{truncate}
-\title{Truncate a binary stream}
+\title{Truncate a Binary Stream}
 \description{
   Truncates a binary stream at its current position.
 }
@@ -8,12 +8,14 @@
   truncate(stream)
 }
 \arguments{
-  \item{stream}{a stream previously opened in write mode}
+  \item{stream}{a stream previously opened in write mode.}
 }
-\value{the new size of the stream}
+\value{
+  The new size of the stream.
+}
 \details{
-This function will truncate the file at the current position.  Any data
-after this position will be deleted.  
+  This function will truncate the file at the current position.  Any data
+  after this position will be deleted.  
 }
 \examples{
 \dontrun{s <- openstream("mydata", "write")
